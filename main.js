@@ -7,14 +7,26 @@ const BrowserWindow = electron.BrowserWindow
 const path = require('path')
 const url = require('url')
 
+console.log('Starting...')
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
 
+function debugWindowEvents(win) {
+  const oldEmit = win.emit
+  win.emit = function () {
+    const eventWindowId = win && !win.isDestroyed() ? win.id : `none`
+    console.log(`Window [${eventWindowId}] event '${arguments[0]}'`)
+    oldEmit.apply(win, arguments)
+  }
+}
+
 function createWindow () {
   // Create the browser window.
   mainWindow = new BrowserWindow({width: 800, height: 600})
-  
+
+  debugWindowEvents(mainWindow)
     // and load the index.html of the app.
     mainWindow.loadURL(url.format({
       pathname: path.join(__dirname, 'index.html'),
@@ -25,6 +37,7 @@ function createWindow () {
     mainWindow.on('blur', () => console.log("Lost it!"))
     
     hidden = new BrowserWindow({ show: false, width: 500, height: 500 })
+    debugWindowEvents(hidden)
     hidden.loadURL("http://www.yahoo.com")
 
   // alternatively, uncomment the following line to load index.html via
